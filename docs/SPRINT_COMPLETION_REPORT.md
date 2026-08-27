@@ -3,7 +3,7 @@
 > **프로젝트명:** Oracle 자연어 → SQL 생성기 (Oracle SQL Generator)  
 > **보고서 작성일:** 2026-08-27  
 > **기준 문서:** [docs/PRD.md](file:///c:/Users/wlstj/oracle-sql-generator/docs/PRD.md) & [docs/DEVELOPMENT_PLAN.md](file:///c:/Users/wlstj/oracle-sql-generator/docs/DEVELOPMENT_PLAN.md)  
-> **총괄 진행 상태:** **Sprint 0 ~ Sprint 5 전체 구현, Gemini AI 실시간 통합 및 QA 완료 (진척률 100%)**
+> **총괄 진행 상태:** **Sprint 0 ~ Sprint 6 전체 구현, 스키마 제약 & 구문 강조 및 QA 완료 (진척률 100%)**
 
 ---
 
@@ -68,6 +68,15 @@
   - `Gemini 3.6 Flash` ➔ `OpenAI` ➔ `내장 Fallback 엔진` 3단계 무중단 안정망 확립
 * **주요 산출물:** `lib/ai-provider.ts`, `lib/sql-analyzer.ts`, `scripts/verify-all.mjs`, `.env` & `.gitignore`
 
+### 🏃 Sprint 6: 스키마 입력/업로드(환각 방지) 및 SQL 문법 하이라이팅 구현 (Schema & Highlighting)
+* **주요 작업:**
+  - 테이블 구조/컬럼 정의 입력 및 `.sql`/`.txt` 파일 드래그앤드롭 업로더 구현 (`components/schema-input.tsx`)
+  - 원클릭 샘플 스키마(HR 사원/부서, E-Commerce, 커뮤니티) 제공
+  - AI System Instruction에 **Strict Schema Adherence** 강제 (정의되지 않은 컬럼 지어내기 원천 차단)
+  - Oracle SQL 전용 토크나이저 및 구문 강조(Syntax Highlighting) 컴포넌트 탑재 (`components/sql-highlighter.tsx`)
+  - 복사 버튼 클릭 시 서식 없는 순수 SQL 텍스트만 클립보드로 복사 유지
+* **주요 산출물:** `components/schema-input.tsx`, `components/sql-highlighter.tsx`, `components/sql-viewer.tsx`, `scripts/verify-all.mjs`
+
 ---
 
 ## 3. 핵심 아키텍처 및 디렉터리 매핑
@@ -75,35 +84,37 @@
 ```
 oracle-sql-generator/
 ├── app/
-│   ├── api/generate-sql/route.ts  # 10s 타임아웃 & Oracle SQL 생성 API
+│   ├── api/generate-sql/route.ts  # 10s 타임아웃 & 스키마 지원 Oracle SQL 생성 API
 │   ├── layout.tsx                 # 전역 레이아웃 및 폰트 설정
-│   └── page.tsx                   # PRD 3.1 준수 단일 화면 (1~10 요소)
+│   └── page.tsx                   # PRD 3.1 준수 단일 화면 (스키마 + 1~10 요소)
 ├── components/
 │   ├── danger-alert.tsx           # E-10 위험 SQL 경고 배너
 │   ├── error-alert.tsx            # 빨간색 인라인/결과 오류 알림
-│   └── sql-viewer.tsx             # 구문 강조 및 줄바꿈 지원 SQL 뷰어
+│   ├── schema-input.tsx           # 스키마 입력/파일 업로드 & 샘플 DDL UI
+│   ├── sql-highlighter.tsx        # Oracle SQL 문법 하이라이팅 토크나이저
+│   └── sql-viewer.tsx             # 구문 강조 및 줄 번호 지원 SQL 뷰어
 ├── hooks/
-│   └── use-sql-generator.ts       # 클라이언트 상태 머신, 레이스 컨디션 방지, 클립보드
+│   └── use-sql-generator.ts       # 클라이언트 상태 머신, 스키마 상태, 클립보드
 ├── lib/
-│   ├── ai-provider.ts             # LLM API(Gemini/OpenAI) & 내장 Fallback 엔진
+│   ├── ai-provider.ts             # Gemini 3.6 Flash / 스키마 엄격 제약 / Fallback
 │   ├── constants.ts               # PRD 에러 메시지 원문 및 시스템 상수
 │   ├── sql-analyzer.ts            # 위험 키워드 및 타 DBMS/모호성 검증기
 │   └── types.ts                   # 공통 인터페이스 및 타입 정의
 ├── docs/                          # 프로젝트 공식 문서 체계
 │   ├── PRD.md                     # 제품 요구사항 정의서 (SSOT)
-│   ├── DEVELOPMENT_PLAN.md        # 스프린트 개발 계획서
+│   ├── DEVELOPMENT_PLAN.md        # 스프린트 개발 계획서 (Sprint 0 ~ 6)
 │   ├── TEST_CASES.md              # 표준 테스트 케이스 목록
-│   ├── TEST_RESULTS.md            # 테스트 결과 보고서 (100% PASS)
+│   ├── TEST_RESULTS.md            # 테스트 결과 보고서 (21/21 PASS)
 │   └── SPRINT_COMPLETION_REPORT.md# 스프린트 완료 보고서 (본 문서)
 └── scripts/
-    └── verify-all.mjs             # Sprint 4 자동화 검증 스크립트
+    └── verify-all.mjs             # 종합 자동화 검증 스크립트 (Sprint 4/5/6)
 ```
 
 ---
 
 ## 4. 최종 인수 검사 및 배포 준비 상태
 
-- [x] **기능 완성도**: PRD 요구사항 100% 반영 완료
+- [x] **기능 완성도**: PRD 및 신규 요구사항(스키마 입력/업로드, 구문 강조) 100% 반영 완료
 - [x] **빌드 무결성**: Next.js Production Build 통과 (`npm run build`)
-- [x] **테스트 통과율**: 10개 대표 프롬프트 100% PASS / 12개 예외 케이스 100% 방어
-- [x] **문서 최신화**: PRD, 개발계획서, 테스트명세, 테스트결과, 개요 문서 동기화 완료
+- [x] **테스트 통과율**: 21개 전체 자동화 검증 케이스 100% PASS
+- [x] **문서 최신화**: PRD, 개발계획서, 테스트명세, 테스트결과, 완료보고서 동기화 완료

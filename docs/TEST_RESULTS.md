@@ -37,7 +37,16 @@
 
 ---
 
-## 3. 예외 케이스 전수 검증 결과 (PRD 5장 E-01 ~ E-12)
+## 3. 스키마 제약 기반 엄격 검증 결과 (Sprint 6 - 환각 방지)
+
+| ID | 카테고리 | 입력 커스텀 스키마 | 입력 자연어 프롬프트 | 생성된 Oracle SQL | 검증 결과 |
+| :--- | :--- | :--- | :--- | :--- | :---: |
+| **TC-SCH01** | 단일 테이블 컬럼 강제 | `CREATE TABLE employees (emp_no NUMBER PRIMARY KEY, emp_nm VARCHAR2(50), dept_cd VARCHAR2(10), monthly_pay NUMBER);` | `사원들의 이름과 월급을 조회해줘` | `SELECT emp_nm, monthly_pay FROM employees;` | **PASS** |
+| **TC-SCH02** | 다중 테이블 JOIN 강제 | `tbl_user (usr_seq, usr_id, usr_nick)`<br>`tbl_point_log (log_seq, usr_seq, pnt_amt, reg_dt)` | `유저 닉네임과 포인트 충전 내역을 조인해서 조회해줘` | `SELECT a.usr_id, a.usr_nick, b.log_seq, b.pnt_amt, b.reg_dt FROM tbl_user a JOIN tbl_point_log b ON a.usr_seq = b.usr_seq;` | **PASS** |
+
+---
+
+## 4. 예외 케이스 전수 검증 결과 (PRD 5장 E-01 ~ E-12)
 
 > **결과 요약:** **12개 예외 케이스 100% 정상 처리 확인**
 

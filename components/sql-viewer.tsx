@@ -1,4 +1,5 @@
 import { Code2, Database } from 'lucide-react'
+import { SqlHighlighter } from './sql-highlighter'
 
 interface SqlViewerProps {
   sql: string | null
@@ -28,18 +29,21 @@ export function SqlViewer({ sql, isDangerous }: SqlViewerProps) {
           <Database className="size-3.5 text-primary" aria-hidden="true" />
           <span className="font-mono text-xs font-semibold text-foreground">Oracle SQL (19c/21c)</span>
         </div>
-        {isDangerous && (
-          <span className="rounded bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-            DML / DDL (위험)
+        <div className="flex items-center gap-2">
+          {isDangerous && (
+            <span className="rounded bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              DML / DDL (위험)
+            </span>
+          )}
+          <span className="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+            Syntax Highlighted
           </span>
-        )}
+        </div>
       </div>
 
-      {/* SQL 코드 본문 (PRD 3.6: 줄바꿈 유지, 읽기 전용, 편집/실행 버튼 미제공) */}
-      <div className="overflow-x-auto p-5">
-        <pre className="font-mono text-sm leading-relaxed text-foreground select-text whitespace-pre">
-          <code>{sql}</code>
-        </pre>
+      {/* SQL 코드 본문 (구문 강조 적용, 읽기 전용, 순수 텍스트 선택 가능) */}
+      <div className="overflow-x-auto p-5 bg-card/50">
+        <SqlHighlighter sql={sql} />
       </div>
     </div>
   )

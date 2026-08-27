@@ -22,6 +22,7 @@ export interface SqlAnalysisResult {
 
 export interface GenerateSqlRequest {
   prompt: string
+  schema?: string
   requestId?: string
 }
 
@@ -44,6 +45,7 @@ export type GeneratorUiStatus =
 
 export interface GeneratorState {
   prompt: string
+  schema: string
   status: GeneratorUiStatus
   sql: string | null
   isDangerous: boolean

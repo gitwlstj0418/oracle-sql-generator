@@ -1,5 +1,5 @@
 /**
- * Sprint 4 & Sprint 5: 대표 10건 + 심화 AI 쿼리 3건 + 예외 케이스 6건 자동화 검증 스크립트
+ * Sprint 4, 5, 6: 대표 10건 + 심화 AI 쿼리 3건 + 스키마 제약 쿼리 2건 + 예외 케이스 6건 자동화 검증 스크립트
  */
 
 const BASE_URL = 'http://localhost:3000/api/generate-sql'
@@ -88,6 +88,25 @@ const advancedAiTests = [
   },
 ]
 
+const schemaConstraintTests = [
+  {
+    id: 'TC-SCH01',
+    category: '커스텀 스키마 컬럼 강제 (환각 방지)',
+    schema: 'CREATE TABLE employees (emp_no NUMBER PRIMARY KEY, emp_nm VARCHAR2(50), dept_cd VARCHAR2(10), monthly_pay NUMBER);',
+    prompt: '사원들의 이름과 월급을 조회해줘',
+    expectedKeywords: ['emp_nm', 'monthly_pay'],
+    expectDanger: false,
+  },
+  {
+    id: 'TC-SCH02',
+    category: '커스텀 조인 스키마 컬럼 강제 (외래키 관계)',
+    schema: 'tbl_user (usr_seq, usr_id, usr_nick)\ntbl_point_log (log_seq, usr_seq, pnt_amt, reg_dt)',
+    prompt: '유저 닉네임과 포인트 충전 내역을 조인해서 조회해줘',
+    expectedKeywords: ['usr_seq', 'tbl_user', 'tbl_point_log'],
+    expectDanger: false,
+  },
+]
+
 const exceptionTests = [
   {
     id: 'TC-E01',
@@ -137,11 +156,12 @@ const exceptionTests = [
 
 async function runSuite() {
   console.log('=================================================================')
-  console.log('  Oracle SQL Generator - Gemini 3.6 Flash & QA 자동 검증 시작')
+  console.log('  Oracle SQL Generator - Sprint 4/5/6 종합 자동 검증 시작')
   console.log('=================================================================\n')
 
   let repPassed = 0
   let advPassed = 0
+  let schPassed = 0
   let expPassed = 0
 
   // 1. 대표 케이스 10건 테스트
@@ -186,8 +206,33 @@ async function runSuite() {
     console.log(`[${isPassed ? 'PASS' : 'FAIL'}] ${t.id} - ${t.category} (${duration}ms)`)
   }
 
-  // 3. 예외 케이스 테스트
-  console.log('\n--- [3] 예외 케이스 테스트 (PRD 5장 예외 처리 검증) ---')
+  // 3. 스키마 제약 기반 쿼리 테스트 (Sprint 6 검증)
+  console.log('\n--- [3] 스키마 입력 기반 엄격 제약 쿼리 테스트 (Sprint 6 검증) ---')
+  for (const t of schemaConstraintTests) {
+    const startTime = Date.now()
+    const res = await fetch(BASE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: t.prompt, schema: t.schema, requestId: t.id }),
+    })
+    const duration = Date.now() - startTime
+    const data = await res.json()
+
+    const hasSql = Boolean(data.success && data.sql)
+    const dangerMatch = Boolean(data.isDangerous) === t.expectDanger
+    const keywordsMatch = t.expectedKeywords.every((kw) => data.sql && data.sql.includes(kw))
+    const isPassed = hasSql && dangerMatch && keywordsMatch
+
+    if (isPassed) schPassed++
+
+    console.log(`[${isPassed ? 'PASS' : 'FAIL'}] ${t.id} - ${t.category} (${duration}ms)`)
+    if (!keywordsMatch && data.sql) {
+      console.log(`      SQL Output: ${data.sql}`)
+    }
+  }
+
+  // 4. 예외 케이스 테스트
+  console.log('\n--- [4] 예외 케이스 테스트 (PRD 5장 예외 처리 검증) ---')
   for (const t of exceptionTests) {
     const startTime = Date.now()
     const res = await fetch(BASE_URL, {
@@ -210,10 +255,16 @@ async function runSuite() {
   console.log('\n=================================================================')
   console.log(`  대표 10건 결과: ${repPassed}/${representativeTests.length} 통과 (성공조건 8건 기준: ${repPassed >= 8 ? 'PASS' : 'FAIL'})`)
   console.log(`  심화 AI 쿼리 결과: ${advPassed}/${advancedAiTests.length} 통과 (PASS)`)
+  console.log(`  스키마 제약 쿼리 결과: ${schPassed}/${schemaConstraintTests.length} 통과 (PASS)`)
   console.log(`  예외 케이스 결과: ${expPassed}/${exceptionTests.length} 통과 (PASS)`)
   console.log('=================================================================\n')
 
-  if (repPassed >= 8 && expPassed === exceptionTests.length && advPassed === advancedAiTests.length) {
+  if (
+    repPassed >= 8 &&
+    advPassed === advancedAiTests.length &&
+    schPassed === schemaConstraintTests.length &&
+    expPassed === exceptionTests.length
+  ) {
     process.exit(0)
   } else {
     process.exit(1)

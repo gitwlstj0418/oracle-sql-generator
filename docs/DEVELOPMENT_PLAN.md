@@ -1,7 +1,7 @@
 # Oracle 자연어 → SQL 생성기 개발 계획서 (Sprint Development Plan)
 
-> **문서 버전:** 1.2.0  
-> **진행 상태:** **Sprint 0 ~ Sprint 5 전체 완료 (100% 달성 - Gemini AI 실시간 통합)**  
+> **문서 버전:** 1.3.0  
+> **진행 상태:** **Sprint 0 ~ Sprint 6 전체 완료 (100% 달성 - 스키마 제약 & 구문 강조 탑재)**  
 > **기준 문서:** [docs/PRD.md](file:///c:/Users/wlstj/oracle-sql-generator/docs/PRD.md)  
 > **프로젝트 목표:** 단일 화면에서 자연어 입력을 받아 1분 이내에 1개의 표준 Oracle SQL을 생성하고 복사할 수 있는 경량 웹 서비스 구축  
 > **핵심 흐름:** `자연어 입력 → Oracle SQL 생성 → 결과 복사`
@@ -282,6 +282,44 @@ PRD 1.4 성공조건 및 6.1~6.6 전체 체크리스트를 전수 검증하고, 
 - [x] 실제 Gemini API 키로 호출 시 100% 정상 Oracle 19c/21c SQL 생성
 - [x] 심화 복합 쿼리(윈도우 함수, 다중 JOIN, 날짜 연산) 정상 생성 및 검증 통과
 - [x] API Key 미노출 보안 조치 완료 (.gitignore 적용)
+
+---
+
+### 🏃 Sprint 6: 스키마 입력/업로드(환각 방지) 및 SQL 문법 하이라이팅 구현 (Schema Constraints & Syntax Highlighting)
+
+#### 🎯 스프린트 목표
+사용자가 정의한 테이블/컬럼 스키마 안에서만 SQL이 생성되도록 강제하여 비존재 컬럼 생성(Hallucination)을 원천 방지하고, 생성 결과를 다채로운 색상의 구문 강조(Syntax Highlighting) 코드 블록으로 시각화한다.
+
+#### 📋 세부 작업 항목 (Tasks)
+1. **[Schema UI] 스키마 입력 및 파일 업로드 컴포넌트 (`components/schema-input.tsx`)**
+   - 접이식(Accordion) 패널 및 스키마 적용 뱃지 표시
+   - `.sql`, `.txt`, `.ddl` 파일 드래그앤드롭/파일 선택 업로드 지원
+   - 원클릭 샘플 스키마(HR 사원/부서, E-Commerce 주문/상품, 커뮤니티 회원/게시글) 제공
+   - 스키마 초기화 버튼
+2. **[AI Schema Constraint] 엄격한 스키마 준수 프롬프트 엔진 (`lib/ai-provider.ts`)**
+   - `GenerateSqlRequest` 및 API에 `schema` 파라미터 연동
+   - Gemini 3.6 Flash System Instruction에 **Strict Schema Adherence** 강제 (정의되지 않은 컬럼/테이블 지어내기 금지)
+   - 괄호 깊이 추적 기반 DDL 파서 및 스키마 인식 Fallback 엔진 내장
+3. **[Syntax Highlighting] Oracle SQL 전용 토크나이저 및 구문 강조기 (`components/sql-highlighter.tsx` & `components/sql-viewer.tsx`)**
+   - 키워드(보라/파랑), 함수(하늘/청록), 문자열(에메랄드), 숫자(오렌지), 위험 DML(앰버), 주석(그레이 이탤릭) 색상 분리
+   - 라인 넘버 표시 및 줄바꿈 지원
+   - `복사` 버튼 클릭 시 서식 없는 순수 SQL 텍스트만 클립보드로 복사 유지
+4. **[QA & Verify] 스키마 제약 자동화 테스트 스위트 확장 (`scripts/verify-all.mjs`)**
+   - 커스텀 단일 테이블 및 다중 테이블 JOIN 스키마 제약 검증 100% 통과
+
+#### 📦 산출물 (Deliverables)
+- [x] `components/schema-input.tsx` (스키마 입력 & 업로드 UI)
+- [x] `components/sql-highlighter.tsx` (Oracle SQL 구문 강조 토크나이저)
+- [x] `components/sql-viewer.tsx` (구문 강조 뷰어 연동)
+- [x] `hooks/use-sql-generator.ts` (스키마 상태 바인딩)
+- [x] `lib/ai-provider.ts` & `app/api/generate-sql/route.ts` (스키마 제약 엔진)
+- [x] `scripts/verify-all.mjs` (Sprint 6 자동화 테스트 스위트)
+
+#### ✅ 인수 조건 (Acceptance Criteria)
+- [x] 스키마 입력 시 AI가 스키마에 정의된 컬럼명/테이블명만 사용하여 정확한 SQL 생성
+- [x] 생성된 SQL에 키워드/함수/문자열/숫자 구문 강조가 정상 렌더링됨
+- [x] 복사 버튼 클릭 시 순수 텍스트만 복사됨
+- [x] 자동화 검증 21/21 케이스 100% PASS 및 Next.js 빌드 성공
 
 ---
 

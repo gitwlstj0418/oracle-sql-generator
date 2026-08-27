@@ -20,8 +20,9 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const { prompt, requestId } = body
+  const { prompt, schema, requestId } = body
   const trimmed = (prompt || '').trim()
+  const trimmedSchema = (schema || '').trim()
 
   // 1. 입력값 없음 검증 (PRD 5.1 / E-01)
   if (!trimmed) {
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
   const timeoutId = setTimeout(() => controller.abort(), SYSTEM_LIMITS.API_TIMEOUT_MS)
 
   try {
-    const result = await generateOracleSql(trimmed, controller.signal)
+    const result = await generateOracleSql(trimmed, trimmedSchema, controller.signal)
     clearTimeout(timeoutId)
 
     if (result.errorCode) {

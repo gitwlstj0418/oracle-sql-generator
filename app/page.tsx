@@ -3,6 +3,7 @@
 import { Check, Clipboard, LoaderCircle, Sparkles, Terminal } from 'lucide-react'
 import { DangerAlert } from '@/components/danger-alert'
 import { ErrorAlert } from '@/components/error-alert'
+import { SchemaInput } from '@/components/schema-input'
 import { SqlViewer } from '@/components/sql-viewer'
 import { Button } from '@/components/ui/button'
 import { useSqlGenerator } from '@/hooks/use-sql-generator'
@@ -15,7 +16,7 @@ const EXAMPLE_PROMPTS = [
 ]
 
 export default function Page() {
-  const { state, setPrompt, generateSql, copySqlToClipboard, labels } = useSqlGenerator()
+  const { state, setPrompt, setSchema, generateSql, copySqlToClipboard, labels } = useSqlGenerator()
 
   const isLoading = state.status === 'loading'
   const hasSqlResult = Boolean(state.sql)
@@ -51,6 +52,13 @@ export default function Page() {
 
         {/* 단일 카드 레이아웃 */}
         <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
+          {/* 테이블 스키마 입력/업로드 영역 (환각 방지) */}
+          <SchemaInput
+            schema={state.schema}
+            onChange={setSchema}
+            disabled={isLoading}
+          />
+
           {/* ========================================================================= */}
           {/* [순서 3] 자연어 입력창 */}
           {/* ========================================================================= */}

@@ -13,6 +13,7 @@ import { GenerateSqlResponse, GeneratorState, SqlErrorCode } from '@/lib/types'
 
 const initialState: GeneratorState = {
   prompt: '',
+  schema: '',
   status: 'idle',
   sql: null,
   isDangerous: false,
@@ -36,6 +37,19 @@ export function useSqlGenerator() {
       ...prev,
       prompt: value,
       inputError: null,
+      resultError: null,
+      sql: null,
+      isDangerous: false,
+      warningMessage: null,
+      status: prev.status === 'loading' ? 'loading' : 'idle',
+    }))
+  }, [])
+
+  // 1-1. 스키마 변경 핸들러
+  const setSchema = useCallback((value: string) => {
+    setState((prev) => ({
+      ...prev,
+      schema: value,
       resultError: null,
       sql: null,
       isDangerous: false,
@@ -108,7 +122,11 @@ export function useSqlGenerator() {
       const response = await fetch('/api/generate-sql', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: state.prompt.trim(), requestId }),
+        body: JSON.stringify({
+          prompt: state.prompt.trim(),
+          schema: state.schema.trim(),
+          requestId,
+        }),
         signal: controller.signal,
       })
 
@@ -165,7 +183,7 @@ export function useSqlGenerator() {
         inputError: null,
       }))
     }
-  }, [state.prompt, state.status, validateInput])
+  }, [state.prompt, state.schema, state.status, validateInput])
 
   // 4. 클립보드 복사 핸들러 (PRD 3.7 / 5.11 / 5.12)
   const copySqlToClipboard = useCallback(async () => {
@@ -214,6 +232,7 @@ export function useSqlGenerator() {
   return {
     state,
     setPrompt,
+    setSchema,
     generateSql,
     copySqlToClipboard,
     labels: {
