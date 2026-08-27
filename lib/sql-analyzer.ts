@@ -1,17 +1,22 @@
 import { DANGEROUS_SQL_KEYWORDS, NON_ORACLE_DBMS_KEYWORDS } from './constants'
 import { DangerousKeyword, SqlAnalysisResult } from './types'
 
-/**
- * SQL 코드 정리 (마크다운 코드 블록 제거 및 포맷팅)
- */
 export function cleanSql(raw: string): string {
   if (!raw) return ''
   let cleaned = raw.trim()
 
-  // 마크다운 코드 블록 (```sql ... ``` or ``` ... ```) 제거
-  if (cleaned.startsWith('```')) {
+  // 1. 마크다운 코드 블록 (```sql ... ``` or ``` ... ```)이 포함되어 있는 경우 내부 내용만 추출
+  const codeBlockMatch = cleaned.match(/```(?:sql)?\s*([\s\S]*?)\s*```/i)
+  if (codeBlockMatch && codeBlockMatch[1]) {
+    cleaned = codeBlockMatch[1].trim()
+  } else if (cleaned.startsWith('```')) {
     cleaned = cleaned.replace(/^```(?:sql)?\s*\n?/i, '')
     cleaned = cleaned.replace(/\n?```\s*$/i, '')
+  }
+
+  // 2. 앞뒤 불필요한 따옴표 제거
+  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
+    cleaned = cleaned.slice(1, -1).trim()
   }
 
   return cleaned.trim()

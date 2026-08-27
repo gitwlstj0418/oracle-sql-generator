@@ -1,9 +1,11 @@
 # Oracle 자연어 → SQL 생성기 개발 계획서 (Sprint Development Plan)
 
-> **문서 버전:** 1.0.0  
+> **문서 버전:** 1.2.0  
+> **진행 상태:** **Sprint 0 ~ Sprint 5 전체 완료 (100% 달성 - Gemini AI 실시간 통합)**  
 > **기준 문서:** [docs/PRD.md](file:///c:/Users/wlstj/oracle-sql-generator/docs/PRD.md)  
 > **프로젝트 목표:** 단일 화면에서 자연어 입력을 받아 1분 이내에 1개의 표준 Oracle SQL을 생성하고 복사할 수 있는 경량 웹 서비스 구축  
 > **핵심 흐름:** `자연어 입력 → Oracle SQL 생성 → 결과 복사`
+
 
 ---
 
@@ -247,6 +249,39 @@ PRD 1.4 성공조건 및 6.1~6.6 전체 체크리스트를 전수 검증하고, 
 #### ✅ 인수 조건 (Acceptance Criteria)
 - [x] 대표 10건 테스트 중 8건 이상에서 의도에 부합하는 Oracle SQL 초안 생성 완료 (10/10건 통과)
 - [x] PRD 완료 조건 6.1 ~ 6.6 모든 체크박스 100% 충족
+
+---
+
+### 🏃 Sprint 5: Gemini AI 실시간 생성 엔진 통합 및 서비스 고도화 (Gemini AI Integration)
+
+#### 🎯 스프린트 목표
+실제 Google Gemini API Key를 연동하고 최신 `gemini-3.6-flash` 기반 System Instruction 및 CoT 정밀 파서를 구축하여, 복합 쿼리(다중 조인, 윈도우 함수, 계층형 쿼리)까지 완벽하게 처리하는 실시간 인공지능 기반 Oracle SQL 생성 서비스를 확립한다.
+
+#### 📋 세부 작업 항목 (Tasks)
+1. **[AI Model] Gemini 3.6 Flash 모델 연동 (`lib/ai-provider.ts`)**
+   - 레거시 1.5 모델 만료 대응 ➔ `gemini-3.6-flash` REST 엔드포인트 연동
+   - `maxOutputTokens: 2048` 확장으로 Thought 및 복합 SQL 잘림 방지
+2. **[Prompt Engineering] Oracle 19c/21c 전문 프롬프트 고도화**
+   - ROWNUM / FETCH FIRST, SYSDATE / ADD_MONTHS, NVL / COALESCE 문법 강제
+   - 분석 함수 (`ROW_NUMBER()`, `RANK()`, `DENSE_RANK()`, `LISTAGG()`) 생성 지원
+   - 타 DBMS 문법(`LIMIT`, `NOW()`, `AUTO_INCREMENT`, `IFNULL`, `ILIKE`) 엄격 배제
+3. **[Parser & Resilience] 마크다운 정밀 파서 및 3단계 폴백망 구축**
+   - CoT Thought 및 마크다운 코드블록 정밀 추출 (`lib/sql-analyzer.ts`)
+   - `Gemini 3.6 Flash` ➔ `OpenAI` ➔ `내장 Oracle Fallback 엔진` 3단계 무중단 안정망 확립
+4. **[QA & Verify] 실시간 AI 기반 자동화 검증 스크립트 실행 (`scripts/verify-all.mjs`)**
+   - 대표 10건, 심화 AI 쿼리 3건, 예외 케이스 6건 전수 검증 통과
+
+#### 📦 산출물 (Deliverables)
+- [x] `lib/ai-provider.ts` (Gemini 3.6 Flash 실시간 통합)
+- [x] `lib/sql-analyzer.ts` (정밀 파서 개선)
+- [x] `.env` & `.env.local` & `.gitignore` (보안 설정 완료)
+- [x] `scripts/verify-all.mjs` (AI 심화 테스트 세트 추가)
+- [x] `docs/TEST_RESULTS.md` & `docs/SPRINT_COMPLETION_REPORT.md`
+
+#### ✅ 인수 조건 (Acceptance Criteria)
+- [x] 실제 Gemini API 키로 호출 시 100% 정상 Oracle 19c/21c SQL 생성
+- [x] 심화 복합 쿼리(윈도우 함수, 다중 JOIN, 날짜 연산) 정상 생성 및 검증 통과
+- [x] API Key 미노출 보안 조치 완료 (.gitignore 적용)
 
 ---
 
