@@ -1,203 +1,252 @@
-'use client'
+import Link from 'next/link'
+import {
+  ArrowRight,
+  Check,
+  ClipboardCheck,
+  Code2,
+  Database,
+  MessageSquareText,
+  ShieldCheck,
+  Sparkles,
+  Zap,
+} from 'lucide-react'
 
-import { Check, Clipboard, LoaderCircle, Sparkles, Terminal } from 'lucide-react'
-import { DangerAlert } from '@/components/danger-alert'
-import { ErrorAlert } from '@/components/error-alert'
-import { SchemaInput } from '@/components/schema-input'
-import { SqlViewer } from '@/components/sql-viewer'
-import { Button } from '@/components/ui/button'
-import { useSqlGenerator } from '@/hooks/use-sql-generator'
-
-const EXAMPLE_PROMPTS = [
-  '회원 테이블에서 최근 가입한 10명을 조회해줘',
-  'orders 테이블에서 status가 CANCEL인 데이터를 삭제해줘',
-  'users 테이블의 user_id가 100인 데이터의 이름을 홍길동으로 수정해줘',
-  '지난달 매출이 가장 높은 상품 5개를 보여줘',
+const steps = [
+  {
+    number: '01',
+    icon: MessageSquareText,
+    title: '원하는 작업 입력',
+    description: '복잡한 문법 대신 필요한 데이터와 조건을 평소 사용하는 말로 설명하세요.',
+  },
+  {
+    number: '02',
+    icon: Sparkles,
+    title: 'Oracle SQL 생성',
+    description: '요청 의도를 분석해 Oracle 19c·21c 문법에 맞는 SQL 한 건으로 변환합니다.',
+  },
+  {
+    number: '03',
+    icon: ClipboardCheck,
+    title: '검토하고 바로 복사',
+    description: '위험 쿼리 경고와 구문 강조를 확인한 뒤 원하는 데이터베이스 도구로 복사하세요.',
+  },
 ]
 
-export default function Page() {
-  const { state, setPrompt, setSchema, generateSql, copySqlToClipboard, labels } = useSqlGenerator()
+const assurances = [
+  '로그인 없이 바로 사용',
+  'Oracle 19c·21c 문법 지원',
+  '실제 DB 연결 및 실행 없음',
+]
 
-  const isLoading = state.status === 'loading'
-  const hasSqlResult = Boolean(state.sql)
-
-  // 엔터키(Ctrl+Enter / Cmd+Enter)로 생성 실행
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault()
-      generateSql()
-    }
-  }
-
+export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20 text-foreground py-10 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl">
-        {/* ========================================================================= */}
-        {/* [순서 1] 서비스 제목 & [순서 2] 안내 문구 */}
-        {/* ========================================================================= */}
-        <header className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary mb-3">
-            <Terminal className="size-3.5" aria-hidden="true" />
-            <span>Oracle 19c / 21c Compatible</span>
-          </div>
-          {/* 순서 1: 서비스 제목 */}
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
-            Oracle 자연어 → SQL 생성기
-          </h1>
-          {/* 순서 2: 안내 문구 */}
-          <p className="mt-2 text-sm sm:text-base text-muted-foreground">
-            수행하고 싶은 DB 작업을 자연어로 입력하면 즉시 사용할 수 있는 표준 Oracle SQL 1개를 생성합니다.
-          </p>
-        </header>
-
-        {/* 단일 카드 레이아웃 */}
-        <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
-          {/* 테이블 스키마 입력/업로드 영역 (환각 방지) */}
-          <SchemaInput
-            schema={state.schema}
-            onChange={setSchema}
-            disabled={isLoading}
-          />
-
-          {/* ========================================================================= */}
-          {/* [순서 3] 자연어 입력창 */}
-          {/* ========================================================================= */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label htmlFor="prompt-input" className="text-sm font-semibold text-foreground">
-                원하는 DB 작업 요청
-              </label>
-              <span className="text-xs text-muted-foreground">
-                {state.prompt.length} / 1,000자 (Ctrl + Enter로 생성)
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="sticky top-0 z-50 border-b border-[var(--outline-variant)] bg-white/95 backdrop-blur-sm">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-5 lg:px-10">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4"
+            aria-label="SQLForge 홈"
+          >
+            <span className="grid size-9 place-items-center rounded bg-primary text-primary-foreground">
+              <Database className="size-5" aria-hidden="true" />
+            </span>
+            <span className="flex items-baseline gap-2">
+              <span className="text-lg font-bold tracking-[-0.02em] text-[var(--secondary-ink)]">SQLForge</span>
+              <span className="hidden text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:inline">
+                Oracle SQL Generator
               </span>
-            </div>
-            <textarea
-              id="prompt-input"
-              value={state.prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="예: orders 테이블에서 status가 CANCEL인 데이터를 삭제해줘"
-              rows={4}
-              className="w-full resize-none rounded-xl border border-input bg-background px-4 py-3 text-sm leading-relaxed shadow-sm transition placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
-              disabled={isLoading}
-            />
+            </span>
+          </Link>
 
-            {/* 빠른 예시 선택 칩 */}
-            <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="text-xs text-muted-foreground mr-1">예시:</span>
-              {EXAMPLE_PROMPTS.map((example, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => setPrompt(example)}
-                  className="rounded-md border border-border bg-muted/40 px-2 py-1 text-[11px] text-muted-foreground transition hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+          <nav className="flex items-center gap-2" aria-label="주요 메뉴">
+            <a
+              href="#workflow"
+              className="hidden h-10 items-center px-3 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+            >
+              사용 방법
+            </a>
+            <Link
+              href="/generator"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded bg-primary px-4 text-sm font-bold text-primary-foreground transition-colors hover:bg-[var(--primary-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            >
+              SQL 생성기 열기
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        <section className="relative overflow-hidden border-b border-[var(--outline-variant)] bg-background">
+          <div className="pointer-events-none absolute inset-0 landing-grid opacity-60" aria-hidden="true" />
+          <div className="relative mx-auto grid w-full max-w-7xl gap-14 px-5 py-16 md:py-24 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:px-10 lg:py-28">
+            <div className="max-w-2xl">
+              <div className="mb-6 inline-flex items-center gap-2 border border-[var(--outline-variant)] bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.1em] text-primary">
+                <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
+                Built for Oracle 19c / 21c
+              </div>
+
+              <h1 className="text-[2.5rem] font-bold leading-[1.12] tracking-[-0.035em] text-[var(--secondary-ink)] sm:text-5xl lg:text-[3.5rem]">
+                자연어를 Oracle SQL로,
+                <span className="mt-2 block text-primary">가장 빠른 쿼리 작성</span>
+              </h1>
+
+              <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
+                복잡한 문법을 다시 찾을 필요 없이 원하는 데이터 작업을 설명하세요. SQLForge가
+                실행 전 검토하기 쉬운 Oracle SQL로 정리합니다.
+              </p>
+
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Link
+                  href="/generator"
+                  className="inline-flex h-12 min-w-52 items-center justify-center gap-2 rounded bg-primary px-6 text-base font-bold text-primary-foreground shadow-[0_1px_3px_rgba(0,0,0,0.16)] transition-colors hover:bg-[var(--primary-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 >
-                  {example.length > 25 ? example.substring(0, 25) + '...' : example}
-                </button>
+                  무료로 SQL 생성하기
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+                <span className="inline-flex h-12 items-center justify-center gap-2 px-3 text-sm font-medium text-muted-foreground sm:justify-start">
+                  <ShieldCheck className="size-4 text-[var(--success)]" aria-hidden="true" />
+                  회원가입과 DB 연결이 필요 없습니다
+                </span>
+              </div>
+
+              <ul className="mt-8 grid gap-2 text-sm text-[var(--secondary-ink)] sm:grid-cols-3">
+                {assurances.map((item) => (
+                  <li key={item} className="flex items-center gap-2">
+                    <span className="grid size-5 shrink-0 place-items-center rounded-full bg-[var(--success-soft)] text-[var(--success)]">
+                      <Check className="size-3" strokeWidth={3} aria-hidden="true" />
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="relative mx-auto w-full max-w-2xl lg:mx-0">
+              <div className="absolute -inset-5 translate-x-4 translate-y-4 border border-[var(--outline-variant)] bg-[var(--primary-soft)]" aria-hidden="true" />
+              <div className="relative border border-[var(--code-border)] bg-[var(--code-bg)] shadow-[0_16px_40px_rgba(26,28,30,0.16)]">
+                <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                  <div className="flex items-center gap-2" aria-hidden="true">
+                    <span className="size-2 rounded-full bg-primary" />
+                    <span className="size-2 rounded-full bg-amber-400" />
+                    <span className="size-2 rounded-full bg-[var(--success)]" />
+                  </div>
+                  <span className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-white/50">
+                    Oracle SQL · Preview
+                  </span>
+                </div>
+
+                <div className="border-b border-white/10 bg-white/[0.03] px-5 py-5">
+                  <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-white/45">
+                    Natural language request
+                  </p>
+                  <p className="text-sm leading-6 text-white/90">지난달 매출이 가장 높은 상품 5개를 보여줘</p>
+                </div>
+
+                <div className="grid grid-cols-[42px_1fr] px-0 py-5 font-mono text-[13px] leading-6 sm:text-sm">
+                  <div className="select-none border-r border-white/10 pr-3 text-right text-white/25" aria-hidden="true">
+                    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div>
+                  </div>
+                  <pre className="overflow-x-auto pl-4 pr-5 text-[var(--code-text)]"><code><span className="text-[var(--code-keyword)]">SELECT</span>{'\n'}    product_id,{'\n'}    <span className="text-sky-300">SUM</span>(sales_amount) <span className="text-[var(--code-keyword)]">AS</span> total_sales{'\n'}<span className="text-[var(--code-keyword)]">FROM</span> sales{'\n'}<span className="text-[var(--code-keyword)]">GROUP BY</span> product_id{'\n'}<span className="text-[var(--code-keyword)]">ORDER BY</span> total_sales DESC{'\n'}<span className="text-[var(--code-keyword)]">FETCH FIRST</span> <span className="text-amber-300">5</span> <span className="text-[var(--code-keyword)]">ROWS ONLY</span>;</code></pre>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-white/10 bg-white/[0.03] px-4 py-3">
+                  <span className="inline-flex items-center gap-2 text-xs font-medium text-white/55">
+                    <Code2 className="size-3.5" aria-hidden="true" /> 단일 쿼리 생성 완료
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--success-bright)]">
+                    <Check className="size-3.5" aria-hidden="true" /> Oracle 문법
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="workflow" className="scroll-mt-20 bg-white py-16 md:py-24">
+          <div className="mx-auto w-full max-w-7xl px-5 lg:px-10">
+            <div className="mb-10 max-w-2xl">
+              <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-primary">Simple workflow</p>
+              <h2 className="text-3xl font-bold tracking-[-0.025em] text-[var(--secondary-ink)] sm:text-4xl">
+                설명하고, 생성하고, 바로 사용하세요
+              </h2>
+              <p className="mt-4 text-base leading-7 text-muted-foreground">
+                SQLForge는 불필요한 설정과 화면 이동 없이 세 단계로 필요한 SQL을 제공합니다.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              {steps.map((step) => {
+                const Icon = step.icon
+                return (
+                  <article key={step.number} className="group relative min-h-64 border border-[var(--outline-variant)] bg-background p-6 transition-colors hover:border-primary/40 hover:bg-[var(--primary-soft)]">
+                    <div className="flex items-start justify-between">
+                      <span className="grid size-11 place-items-center rounded bg-primary text-primary-foreground">
+                        <Icon className="size-5" aria-hidden="true" />
+                      </span>
+                      <span className="font-mono text-sm font-bold text-[var(--outline-strong)]">STEP {step.number}</span>
+                    </div>
+                    <h3 className="mt-10 text-xl font-bold text-[var(--secondary-ink)]">{step.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-muted-foreground">{step.description}</p>
+                    <div className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-primary transition-transform group-hover:scale-x-100" />
+                  </article>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-y border-[var(--outline-variant)] bg-[var(--surface-blue)] py-16 md:py-20">
+          <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-10">
+            <div>
+              <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-primary">Built for review</p>
+              <h2 className="text-3xl font-bold tracking-[-0.025em] text-[var(--secondary-ink)]">실행 전에 판단할 수 있는 결과</h2>
+              <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
+                생성된 SQL을 실제 데이터베이스에서 실행하지 않습니다. 위험 가능성이 있는 명령은 별도로 표시하고, 사용자가 검토한 결과만 복사할 수 있습니다.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[
+                ['01', '위험 SQL 경고', 'UPDATE·DELETE·DDL을 명확히 표시'],
+                ['02', '구문 강조', '키워드와 값의 구조를 빠르게 파악'],
+                ['03', '스키마 참고', '테이블 구조를 요청과 함께 전달'],
+              ].map(([number, title, description]) => (
+                <div key={number} className="border-l-2 border-primary bg-white p-5">
+                  <span className="font-mono text-xs font-bold text-primary">{number}</span>
+                  <h3 className="mt-4 font-bold text-[var(--secondary-ink)]">{title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+                </div>
               ))}
             </div>
           </div>
+        </section>
 
-          {/* ========================================================================= */}
-          {/* [순서 4] 입력 오류 문구 영역 (빨간색 텍스트) */}
-          {/* ========================================================================= */}
-          {state.inputError && <ErrorAlert message={state.inputError} />}
-
-          {/* ========================================================================= */}
-          {/* [순서 5] SQL 생성 버튼 */}
-          {/* ========================================================================= */}
-          <div>
-            <Button
-              type="button"
-              onClick={generateSql}
-              disabled={isLoading}
-              className="h-11 w-full gap-2 rounded-xl text-base font-semibold shadow-sm transition active:scale-[0.99]"
-            >
-              {isLoading ? (
-                <>
-                  <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-                  <span>{labels.generateButton}</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="size-4" aria-hidden="true" />
-                  <span>{labels.generateButton}</span>
-                </>
-              )}
-            </Button>
+        <section className="bg-[var(--secondary-ink)] px-5 py-16 text-center text-white md:py-20 lg:px-10">
+          <div className="mx-auto max-w-3xl">
+            <span className="mx-auto grid size-12 place-items-center rounded bg-primary text-primary-foreground">
+              <Zap className="size-6" aria-hidden="true" />
+            </span>
+            <h2 className="mt-6 text-3xl font-bold tracking-[-0.025em] sm:text-4xl">필요한 Oracle SQL을 지금 만들어보세요</h2>
+            <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-white/65">
+              설치도, 로그인도 필요 없습니다. 자연어 요청 한 줄로 바로 시작할 수 있습니다.
+            </p>
+            <Link href="/generator" className="mt-8 inline-flex h-12 min-w-56 items-center justify-center gap-2 rounded bg-primary px-6 text-base font-bold text-primary-foreground transition-colors hover:bg-[var(--primary-light)] hover:text-[var(--secondary-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--secondary-ink)]">
+              SQL 생성기 시작하기
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
           </div>
+        </section>
+      </main>
 
-          {/* ========================================================================= */}
-          {/* [순서 6] 생성 상태 영역 */}
-          {/* ========================================================================= */}
-          {isLoading && (
-            <div
-              role="status"
-              className="flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 py-3 text-sm font-medium text-primary animate-pulse"
-            >
-              <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-              <span>{labels.generatingStatus}</span>
-            </div>
-          )}
-
-          {/* ========================================================================= */}
-          {/* [순서 7] 결과 오류 문구 영역 (빨간색 텍스트) */}
-          {/* ========================================================================= */}
-          {state.resultError && <ErrorAlert message={state.resultError} />}
-
-          {/* ========================================================================= */}
-          {/* [순서 8] 위험 SQL 경고 영역 */}
-          {/* ========================================================================= */}
-          {state.isDangerous && <DangerAlert message={state.warningMessage} />}
-
-          {/* ========================================================================= */}
-          {/* [순서 9] SQL 결과 영역 */}
-          {/* ========================================================================= */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-foreground">생성 결과</h2>
-              {hasSqlResult && (
-                <span className="text-xs text-muted-foreground">단일 Oracle 쿼리 1건</span>
-              )}
-            </div>
-            <SqlViewer sql={state.sql} isDangerous={state.isDangerous} />
+      <footer className="border-t border-[var(--outline-variant)] bg-white">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-5 py-7 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between lg:px-10">
+          <div className="flex items-center gap-2 font-bold text-[var(--secondary-ink)]">
+            <Database className="size-4 text-primary" aria-hidden="true" /> SQLForge
           </div>
-
-          {/* ========================================================================= */}
-          {/* [순서 10] 복사 버튼 & 복사 피드백/오류 영역 */}
-          {/* ========================================================================= */}
-          {hasSqlResult && (
-            <div className="space-y-2 pt-2 border-t border-border/60">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={copySqlToClipboard}
-                className="h-11 w-full gap-2 rounded-xl text-sm font-semibold border-primary/30 hover:bg-primary/5 hover:border-primary/60 transition"
-              >
-                {state.copyFeedback ? (
-                  <>
-                    <Check className="size-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
-                    <span className="text-emerald-600 dark:text-emerald-400">{state.copyFeedback}</span>
-                  </>
-                ) : (
-                  <>
-                    <Clipboard className="size-4 text-primary" aria-hidden="true" />
-                    <span>{labels.copyButton}</span>
-                  </>
-                )}
-              </Button>
-
-              {/* 복사 실패 에러 (PRD E-12) */}
-              {state.copyError && <ErrorAlert message={state.copyError} />}
-            </div>
-          )}
+          <p>Oracle Engine 19c / 21c compatible · 생성 결과는 실행 전 반드시 검토하세요.</p>
         </div>
-
-        {/* 푸터 안내 */}
-        <footer className="mt-8 text-center text-xs text-muted-foreground">
-          <p>※ 생성된 SQL은 화면에만 표시되며 실제 DB에서 실행되지 않습니다. 실행 전 반드시 내용을 검토하세요.</p>
-        </footer>
-      </div>
-    </main>
+      </footer>
+    </div>
   )
 }

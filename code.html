@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SQLForge - Oracle SQL Generator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#0b1c30",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#930000",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "on-primary-fixed": "#410000",
+                        "inverse-surface": "#213145",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#c00000",
+                        "tertiary-fixed": "#e0e3e6",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary-container": "#ffd4ce",
+                        "on-surface-variant": "#5d3f3a",
+                        "on-secondary-fixed-variant": "#41474f",
+                        "on-secondary-container": "#5f656d",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#c70000",
+                        "outline-variant": "#e7bdb6",
+                        "surface-container-highest": "#d3e4fe",
+                        "primary-fixed": "#ffdad4",
+                        "secondary-fixed-dim": "#c1c7d0",
+                        "secondary-container": "#dde3ec",
+                        "on-tertiary-fixed": "#191c1e",
+                        "surface-container-high": "#dce9ff",
+                        "surface-variant": "#d3e4fe",
+                        "primary": "#9a0000",
+                        "surface": "#f8f9ff",
+                        "tertiary-fixed-dim": "#c4c7ca",
+                        "surface-container": "#e5eeff",
+                        "on-surface": "#0b1c30",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#5f6265",
+                        "secondary": "#595f67",
+                        "primary-fixed-dim": "#ffb4a8",
+                        "on-tertiary-container": "#dcdee1",
+                        "outline": "#926f69",
+                        "inverse-primary": "#ffb4a8",
+                        "surface-container-low": "#eff4ff",
+                        "surface-bright": "#f8f9ff",
+                        "secondary-fixed": "#dde3ec",
+                        "background": "#f8f9ff",
+                        "on-tertiary-fixed-variant": "#44474a",
+                        "on-secondary-fixed": "#161c23",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#474a4d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "sm": "8px",
+                        "touch-target-min": "44px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "gutter": "16px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "code-block-mobile": ["JetBrains Mono"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "display-sm": ["Inter"],
+                        "code-block": ["JetBrains Mono"],
+                        "headline-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "code-block-mobile": ["13px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-sm": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "code-block": ["14px", { "lineHeight": "22px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-surface dark:bg-on-background border-b border-outline-variant dark:border-secondary-container z-50">
+<div class="flex items-center px-margin-mobile h-touch-target-min w-full max-w-screen-xl mx-auto">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed mr-sm" style="font-variation-settings: 'FILL' 1;">database</span>
+<span class="text-headline-md-mobile font-headline-md-mobile font-bold text-primary dark:text-primary-fixed">SQLForge</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col">
+<!-- Hero Section -->
+<section class="px-margin-mobile py-xl md:py-24 max-w-screen-xl mx-auto w-full flex flex-col items-center text-center">
+<div class="mb-lg w-full max-w-xs mx-auto">
+<img alt="SQLForge Logo" class="w-full h-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WCqzeqLBQGQ8JcmhkSVwF2AUGXnX86fff_SexeC1cIPzHGeFZPSZD48qLzgEYGHFZjYmfEpQnJ7aC3Frnrc9wilAM5M38DDbp3ZaxYKlngOshBcfhKYAdBwgCLO_C5PLc1aVvR9TtCDAMJh0owmG0Qc1hplY6zkNNLYHEEYZz_8n6Z1KNIUPnQblS-gQivLTmvm3MAlhTxicrmNc3WPEDhfoWQBZ3-UkctyojubDwWLiU0Tze0oVn8CSQ"/>
+</div>
+<h1 class="font-display-sm text-display-sm text-on-background mb-sm max-w-2xl">
+                자연어를 Oracle SQL로,<br/>가장 쉬운 쿼리 작성
+            </h1>
+<p class="font-body-lg text-body-lg text-secondary mb-xl max-w-xl">
+                복잡한 문법 고민 없이 일상어로 설명하면 즉시 Oracle 전용 SQL을 생성합니다.
+            </p>
+<button class="bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-md text-label-md px-xl py-sm rounded-lg h-touch-target-min transition-colors duration-200 shadow-sm flex items-center justify-center min-w-[200px]">
+                무료로 시작하기
+            </button>
+<div class="mt-lg flex flex-wrap justify-center gap-sm">
+<span class="bg-surface-variant text-on-surface-variant font-label-md text-[12px] px-sm py-xs rounded-full">Oracle 21c 완벽 호환</span>
+<span class="bg-surface-variant text-on-surface-variant font-label-md text-[12px] px-sm py-xs rounded-full">로그인 없이 즉시 사용 가능</span>
+</div>
+</section>
+<!-- Features/Steps Section (Bento-inspired Grid) -->
+<section class="bg-surface-container-lowest py-xl px-margin-mobile w-full">
+<div class="max-w-screen-xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- Step 1 -->
+<div class="border border-outline-variant rounded-xl p-md bg-surface flex flex-col h-full hover:bg-surface-container-low transition-colors duration-200">
+<div class="mb-md">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">chat</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-background mb-xs">Step 01. 원하는 작업 입력</h3>
+<p class="font-body-md text-body-md text-secondary">
+                            "최근 한 달간 가입한 사용자 중 구매 이력이 없는 사람 목록을 보여줘"와 같이 원하는 데이터를 우리말로 설명하세요.
+                        </p>
+</div>
+<!-- Step 2 -->
+<div class="border border-outline-variant rounded-xl p-md bg-surface flex flex-col h-full hover:bg-surface-container-low transition-colors duration-200 relative overflow-hidden">
+<!-- Decorative element for Step 2 -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10"></div>
+<div class="mb-md">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">memory</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-background mb-xs">Step 02. AI 쿼리 생성</h3>
+<p class="font-body-md text-body-md text-secondary mb-md">
+                            AI가 사용자의 의도를 분석하여 최적화된 Oracle SQL 문법으로 즉시 변환합니다.
+                        </p>
+<!-- Mock Code Block -->
+<div class="mt-auto bg-[#1E1E1E] rounded-lg p-sm border border-outline-variant/30 relative">
+<div class="absolute top-sm right-sm flex gap-1">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<div class="w-2 h-2 rounded-full bg-surface-tint"></div>
+<div class="w-2 h-2 rounded-full bg-outline"></div>
+</div>
+<pre class="font-code-block-mobile text-code-block-mobile text-[#D4D4D4] mt-sm overflow-x-hidden"><code><span class="text-[#569CD6]">SELECT</span> *
+<span class="text-[#569CD6]">FROM</span> users
+<span class="text-[#569CD6]">WHERE</span> signup_date > <span class="text-[#CE9178]">'2023-10-01'</span></code></pre>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="border border-outline-variant rounded-xl p-md bg-surface flex flex-col h-full hover:bg-surface-container-low transition-colors duration-200">
+<div class="mb-md">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">content_copy</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-background mb-xs">Step 03. 즉시 복사 및 사용</h3>
+<p class="font-body-md text-body-md text-secondary">
+                            생성된 쿼리를 클릭 한 번으로 복사하여 SQL Developer나 선호하는 DB 툴에 바로 붙여넣어 실행하세요.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom CTA -->
+<section class="py-xl px-margin-mobile flex flex-col items-center justify-center text-center bg-surface-container-high border-t border-outline-variant w-full">
+<h2 class="font-headline-md text-headline-md text-on-background mb-md">지금 바로 데이터 추출을 시작하세요</h2>
+<button class="bg-on-background text-on-primary font-label-md text-label-md px-xl py-sm rounded-lg h-touch-target-min hover:bg-secondary-fixed transition-colors duration-200 shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-xl">bolt</span>
+                지금 바로 SQL 생성하기
+            </button>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-lg bg-surface-container-lowest dark:bg-on-background border-t border-outline-variant dark:border-secondary-container mt-auto">
+<div class="flex flex-col items-center justify-center gap-sm px-margin-mobile w-full text-center">
+<div class="flex gap-md font-label-md text-label-md text-on-surface-variant dark:text-on-secondary-container">
+<a class="hover:text-primary dark:hover:text-primary-fixed transition-colors cursor-pointer" href="#">Documentation</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed transition-colors cursor-pointer" href="#">Privacy Policy</a>
+<a class="hover:text-primary dark:hover:text-primary-fixed transition-colors cursor-pointer" href="#">Security</a>
+</div>
+<p class="text-label-md font-label-md font-semibold text-secondary dark:text-secondary-fixed mt-sm">
+                © 2024 SQLForge Pro. Oracle Engine v21c compatible.
+            </p>
+</div>
+</footer>
+</body></html>
